@@ -59,7 +59,7 @@ Repeat each 100 µs.
     2. Wait 1 µs.
     3. Measure the stateof all qubits.
 
-Repeat the process each 100 µs.
+Repeat the process each 3 µs.
 
 
 5. Fifth measurement. Accurate measure to study impact of quasiparticles in the chip.
