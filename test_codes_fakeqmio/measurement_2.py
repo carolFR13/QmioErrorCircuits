@@ -9,8 +9,6 @@ def create_circuit(num_qubits):
 
     # we are measuring 32 qubits so we need 32 classic qubits to save the results
     qc = QuantumCircuit(num_qubits, num_qubits)
-    # initialice all qubits to state |1⟩
-    qc.x(range(num_qubits))
     
     qc.delay(1000, range(num_qubits), unit='us') # delay of 1000 ns = 1 µs
     # measuring all qubits
@@ -18,10 +16,6 @@ def create_circuit(num_qubits):
     return qc
 
 qc = create_circuit(num_qubits)
-
-# drawing the circuit 
-qc.draw(output='mpl', filename='circuit_1.png')
-
 
 backend = FakeQmio()
 
