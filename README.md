@@ -19,7 +19,8 @@ We will perform the following measurements:
 
     1. Initialize all qubits at state |1>
     2. Wait 1 µs.
-    3. Measure the stateof all qubits.
+    3. Measure the stateof all qubits. 
+    
 
 Repeat the process each 100 µs.
 
@@ -38,6 +39,8 @@ Repeat the process each 100 µs.
 
 3. Third measurement. Measurement of phase coherence times.
 
+*Starting with state |1 >* (verification).
+
     1. Initialize all qubits by applying a pi/2-pulse
     2. Let the qubits evolve for a time t = n * 0.2 µs
     3. Apply another pi/2-pulse to all qubits.
@@ -48,7 +51,9 @@ being n a parameter that runs from 0 to 100, studying the interval [0,20]µs.
 Repeat each 100 µs.
 
 
-4. Fourth measurement. Detailed study of qubits coherence times
+4. Fourth measurement. Detailed study of qubits coherence times.
+
+*Starting with state |1 >* (verification).
 
     1. Initialize all qubits at state |1>
     2. Wait 1 µs.
@@ -58,6 +63,8 @@ Repeat the process each 100 µs.
 
 
 5. Fifth measurement. Accurate measure to study impact of quasiparticles in the chip.
+
+*Starting with state |1 >* (verification).
 
     1. Initialize all qubits at state |1>
     2. After 0 µs performe the measurement of all qubits.
