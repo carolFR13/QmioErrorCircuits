@@ -5,7 +5,7 @@ At the end of the file there arethe algorithms to implement to perform each meas
 According to the qmio tutorial the first implementation should run agains FakeQmio backend (an emulator of the qpu) from qmio-tools to inspect the implementation of the code. We implement the testing codes for each measurement in ```test_codes_fakeqmio```. To run the codes we procede as follows:
 
 - Load the qmio-tools module: ```module load qmio-tools```.
-- Submit the job with the specifications ```sbatch job_fakeqmio.sh```.
+- Submit the job with the specifications ```sbatch -p ilk job_fakeqmio.sh```.
 - You can check the status of the job with ``` squeue ```.
 
 
@@ -19,7 +19,7 @@ We will perform the following measurements:
 
     1. Initialize all qubits at state |1>
     2. Wait 1 µs.
-    3. Measure the stateof all qubits. 
+    3. Measure the state of all qubits. 
     
 
 Repeat the process each 100 µs.
@@ -32,7 +32,7 @@ Repeat the process each 100 µs.
 
     1. Initialize all qubits at state |0>
     2. Wait 1 µs.
-    3. Measure the stateof all qubits.
+    3. Measure the state of all qubits.
 
 Repeat the process each 100 µs.
 
@@ -57,7 +57,7 @@ Repeat each 100 µs.
 
     1. Initialize all qubits at state |1>
     2. Wait 1 µs.
-    3. Measure the stateof all qubits.
+    3. Measure the state of all qubits.
 
 Repeat the process each 3 µs.
 
