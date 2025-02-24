@@ -1,47 +1,27 @@
 from qiskit import QuantumCircuit, transpile
 from qmiotools.integrations.qiskitqmio import FakeQmio
 
-
 # number of qubits
-num_qubits = 32
+num_qubits = 5
 
-backend = FakeQmio()
+backend = FakeQmio(gate_error = True, readout_error = True)
 
+# we initialice the circuit with *num_qubits* qubits and the 
+# same number of classical ones to measure them
+qc = QuantumCircuit(num_qubits, num_qubits)
 
-def create_circuit(num_qubits):
-
-    # we are measuring 32 qubits so we need 32 classic qubits to save the results
-    qc = QuantumCircuit(num_qubits, num_qubits)
-    # initialice all qubits to state |1⟩
-    qc.x(range(num_qubits))
-    
-    qc.delay(1, range(num_qubits), unit='us') # delay of 1 µs
-    # measuring all qubits
-    qc.measure(range(num_qubits), range(num_qubits))
-    return qc
-
-qc = create_circuit(num_qubits)
-
-# drawing the circuit 
-qc.draw(output='mpl', filename='circuit_1.png')
+qc.x(range(num_qubits)) # applying x gate: |0> -> |1>
+qc.delay(1, range(num_qubits), unit='us')  # delay of  1 µs
+qc.measure(range(num_qubits), range(num_qubits))
 
 
-# repeating each 100 µs for 100s
-# num_repetitions = int(100 / 0.0001)
-num_repetitions = 100
+num_repetitions = 10
 
 for i in range(num_repetitions):
 
-    qc.delay(100, range(num_qubits), unit='us')  # delay of  100 µs
-
-    # initializing again the circuit ?
-    qc = create_circuit(num_qubits)
-    
-    # executing the circuit ? 
     qct = transpile(qc, backend)
-    job = backend.run(qct, shots=1024)
+    job = backend.run(qct, shots=1, repetition_period = 500000) # repetition_period in ns ? 
     result = job.result()
-    counts = result.get_counts(qc) # qc ? 
+    counts = result.get_counts(qc)
     
-    # printing results
     print(f"Repetition {i+1} - FakeQmio Counts:", counts)
