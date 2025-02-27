@@ -29,9 +29,10 @@ with open("results1.txt", "w") as f:
 
 # including try except to save each iteration in the file
 # in case the job is interrupted
+
 try: 
     for i in range(num_repetitions):
-        job = backend.run(qct, shots=1, repetition_period=500000)  # repetition_period en ns
+        job = backend.run(qct, shots=1)  
         result = job.result()
         counts = result.get_counts(qc)
 
