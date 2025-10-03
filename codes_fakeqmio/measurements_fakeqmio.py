@@ -2,48 +2,64 @@ from qiskit import QuantumCircuit, transpile
 from qmiotools.integrations.qiskitqmio import FakeQmio
 import time
 
-# number of qubits
+# ---------------- PARAMETERS ----------------
 num_qubits = 6
+init_state = None  
+n_repetitions = 8192              # max per batch
+repetition_period = 15e-6         # desired repetition period in seconds
+target_exposure = 100             # 100s exposure to compare with qmio results
 
-backend = FakeQmio(gate_error = True, readout_error = True)
+# ---------------- BACKEND ----------------
+backend = FakeQmio(gate_error=True, readout_error=True)
 
-# we initialice the circuit with *num_qubits* qubits and the 
-# same number of classical ones to measure them
+# ---------------- CIRCUIT ----------------
 qc = QuantumCircuit(num_qubits, num_qubits)
+qc.x(range(num_qubits))                # |0> -> |1>
+qc.delay(1, range(num_qubits), unit='us')
+qc.measure(range(num_qubits), range(num_qubits))
 
-# ---- circuit definition -----
-qc.x(range(num_qubits)) # applying x gate: |0> -> |1>
-qc.delay(1, range(num_qubits), unit='us')  # delay of  1 µs
-qc.measure(range(num_qubits), range(num_qubits)) # this operation takes about 5 µs
+# approximate intrinsic duration of the active ops (µs)
+active_time = 12e-6   # ~1 µs delay + ~5 µs measure + overhead ≈ 12 µs
 
-# delay of *repetition_periot - execution_circuit_time* from equivalent circuit in qmio
-qc.delay(600, range(num_qubits), unit='us') 
+# pad with idle delay so that total ~ repetition_period
+extra_delay = max(0, repetition_period - active_time)
+qc.delay(extra_delay * 1e6, range(num_qubits), unit='us')
 
+# transpile
 qct = transpile(qc, backend, initial_layout=[20, 21, 22, 23, 30, 31])
 
-#------ circuit execution ------
-n_repetitions = 1000 ; circuit_time = 621
+# ---------------- EXECUTION LOOP ----------------
+total_batches = 0
+total_shots = 0
+start_wall = time.time()
 
-start_time = time.time() #initial time t = 0
+with open("results_fakeqmio.txt", "a") as f:
+    f.write(f"# repetition_period: {repetition_period} s\n")
+    f.write(f"# extra delay inserted: {extra_delay} s\n")
+    f.write(f"# state initialized to: {init_state} \n")
+    f.write("Batch\tShot\tState\tElapsedQPU[s]\tElapsedWall[s]\n")
 
-n_shots = n_repetitions
-result = backend.run(qct, shots=n_repetitions, memory = True).result()  
-memory = result.get_memory(qct)
+    while True:
+        # run one batch
+        result = backend.run(qct, shots=n_repetitions, memory=True).result()
+        memory = result.get_memory(qct)
+        del result  # free memory
 
-# absolute time the circuit lasted
-absolute_time = time.time() - start_time
+        total_batches += 1
+        elapsed_qpu = total_shots * repetition_period
+        elapsed_wall = time.time() - start_wall
 
-# free memory
-del result
+        # save results shot by shot
+        for (i, state) in enumerate(memory):
+            shot_index = total_shots + i + 1
+            shot_qpu_time = shot_index * repetition_period
+            f.write(f"{total_batches}\t{shot_index}\t{state}\t{shot_qpu_time:.6f}\t{elapsed_wall:.6f}\n")
 
-#----- results ----
-print('The absolute exectution time was: ', absolute_time)
-print('The theoretical exectution time is(mus): ', n_repetitions*circuit_time)
-print('memory:\n', memory)
+        total_shots += n_repetitions
 
+        print(f"Batch {total_batches} done, QPU exposure {elapsed_qpu:.3f} s, Wall {elapsed_wall:.2f} s")
 
-with open("results2_fakeqmio.txt", "a") as f:
-    f.write("Repetition\tState\n")
-    for (i,state) in enumerate(memory):
-        f.write(f"{i + 1}\t{state}\n")
+        if elapsed_qpu >= target_exposure:
+            print("Reached target exposure, stopping.")
+            break
 
